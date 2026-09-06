@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
-
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.pipeline import upload_files
 
 source = Path("data/tourism.csv")
