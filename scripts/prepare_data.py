@@ -7,7 +7,7 @@ cleaned = clean_data(load_source_csv())
 train, test = split_and_save(cleaned, "data/processed")
 upload_files(
     ["data/processed/train.csv", "data/processed/test.csv"],
-    repo_id=os.environ["HF_DATASET_REPO_ID"],
+    repo_id=os.environ.get("HF_DATASET_REPO_ID", "sprd12/Great_Learning"),
     repo_type="dataset",
 )
 print(f"Prepared {len(train)} training rows and {len(test)} test rows.")

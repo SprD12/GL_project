@@ -22,7 +22,7 @@ with mlflow.start_run():
     mlflow.log_artifact("artifacts/model.joblib")
 upload_files(
     ["artifacts/model.joblib", "artifacts/metrics.json"],
-    repo_id=os.environ["HF_MODEL_REPO_ID"],
+    repo_id=os.environ.get("HF_MODEL_REPO_ID", "sprd12/RandomForest"),
     repo_type="model",
 )
 print(json.dumps(metrics, indent=2))

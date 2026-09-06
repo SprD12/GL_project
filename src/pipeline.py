@@ -24,12 +24,11 @@ ID_COLUMNS = {"CustomerID", "customerid", "Unnamed: 0"}
 
 
 def _repo_id(kind: str) -> str:
-    value = os.environ.get(f"HF_{kind.upper()}_REPO_ID")
-    if not value:
-        raise RuntimeError(
-            f"Set HF_{kind.upper()}_REPO_ID, for example 'username/tourism-{kind}'."
-        )
-    return value
+    defaults = {
+        "dataset": "sprd12/Great_Learning",
+        "model": "sprd12/RandomForest",
+    }
+    return os.environ.get(f"HF_{kind.upper()}_REPO_ID", defaults[kind])
 
 
 def load_source_csv(path: str | Path | None = None) -> pd.DataFrame:

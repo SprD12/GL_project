@@ -7,6 +7,6 @@ from src.pipeline import upload_files
 source = Path("data/tourism.csv")
 if not source.exists():
     raise FileNotFoundError("Place tourism.csv in data/ before registering the dataset.")
-upload_files([source], os.environ["HF_DATASET_REPO_ID"], "dataset")
-print(f"Registered {source} in {os.environ['HF_DATASET_REPO_ID']}.")
-
+repo_id = os.environ.get("HF_DATASET_REPO_ID", "sprd12/Great_Learning")
+upload_files([source], repo_id, "dataset")
+print(f"Registered {source} in {repo_id}.")

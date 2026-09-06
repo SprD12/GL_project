@@ -11,5 +11,8 @@ load_split_from_hf("test.csv").to_csv("data/processed/test.csv", index=False)
 metrics = train_and_evaluate(
     "data/processed/train.csv", "data/processed/test.csv", "artifacts"
 )
-print("Model trained from Hugging Face dataset:", os.environ["HF_DATASET_REPO_ID"])
+print(
+    "Model trained from Hugging Face dataset:",
+    os.environ.get("HF_DATASET_REPO_ID", "sprd12/Great_Learning"),
+)
 print(metrics)
