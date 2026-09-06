@@ -1,7 +1,9 @@
 """Train from train.csv and test.csv already uploaded to the HF dataset repo."""
-
 import os
 from pathlib import Path
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.pipeline import upload_files
 
 from src.pipeline import load_split_from_hf, train_and_evaluate
 

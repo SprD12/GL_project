@@ -1,4 +1,8 @@
 import os
+from pathlib import Path
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.pipeline import upload_files
 
 from src.pipeline import clean_data, load_source_csv, split_and_save, upload_files
 
