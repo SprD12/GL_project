@@ -5,9 +5,38 @@ import joblib
 import pandas as pd
 import streamlit as st
 from huggingface_hub import hf_hub_download
+from sklearn.base import BaseEstimator
 
 MODEL_PATH = Path("model.joblib")
 MODEL_REPO_ID = os.environ.get("HF_MODEL_REPO_ID", "sprd12/RandomForest")
+
+
+def _restore_sklearn_compatibility(model):
+    """Restore attributes missing from tree estimators serialized by older sklearn."""
+    visited = set()
+
+    def visit(value):
+        if id(value) in visited:
+            return
+        visited.add(id(value))
+
+        if isinstance(value, BaseEstimator):
+            if (
+                value.__class__.__module__ == "sklearn.tree._classes"
+                and not hasattr(value, "monotonic_cst")
+            ):
+                value.monotonic_cst = None
+            for nested in vars(value).values():
+                visit(nested)
+        elif isinstance(value, (list, tuple, set)):
+            for nested in value:
+                visit(nested)
+        elif isinstance(value, dict):
+            for nested in value.values():
+                visit(nested)
+
+    visit(model)
+    return model
 
 
 @st.cache_resource
@@ -22,7 +51,7 @@ def load_model():
                 token=os.environ.get("HF_TOKEN"),
             )
         )
-    return joblib.load(path)
+    return _restore_sklearn_compatibility(joblib.load(path))
 
 
 st.set_page_config(page_title="Wellness Tourism Predictor", page_icon="🌿")

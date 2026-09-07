@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wellness Tourism MLOps Project Report</title>
+  <style>
+    :root { --navy:#12304a; --blue:#1d6fa5; --light:#f3f7fa; --ink:#24313b; }
+    body { margin:0; font-family:Arial, sans-serif; color:var(--ink); background:#eef2f5; line-height:1.6; }
+    main { max-width:960px; margin:32px auto; background:white; padding:42px 52px; box-shadow:0 3px 18px #0001; }
+    h1 { color:var(--navy); margin:0 0 6px; font-size:32px; }
+    h2 { color:var(--navy); border-bottom:2px solid #dce8ef; padding-bottom:6px; margin-top:32px; }
+    h3 { color:var(--blue); margin-bottom:6px; }
+    .subtitle { color:#647582; margin-top:0; }
+    .banner { background:var(--light); border-left:5px solid var(--blue); padding:14px 18px; margin:22px 0; }
+    table { width:100%; border-collapse:collapse; margin:14px 0; }
+    th, td { border:1px solid #d9e2e8; padding:10px 12px; text-align:left; vertical-align:top; }
+    th { background:var(--navy); color:white; }
+    a { color:#12679b; }
+    code { background:#f0f3f5; padding:2px 5px; border-radius:3px; }
+    li { margin:5px 0; }
+    footer { margin-top:38px; padding-top:18px; border-top:1px solid #dce2e6; color:#687780; font-size:13px; }
+    @media print { body { background:white; } main { margin:0; box-shadow:none; } a { color:#12679b; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Wellness Tourism MLOps Project Report</h1>
+  <p class="subtitle">Visit with Us &mdash; Wellness Tourism Package Purchase Prediction</p>
+
+  <div class="banner">
+    This project develops an automated machine-learning workflow to predict whether
+    a customer is likely to purchase the Wellness Tourism Package before outreach.
+  </div>
+
+  <h2>Project Links</h2>
+  <table>
+    <tr><th>Resource</th><th>Link</th></tr>
+    <tr><td>GitHub repository</td><td><a href="https://github.com/SprD12/GL_project">SprD12/GL_project</a></td></tr>
+    <tr><td>Hugging Face dataset</td><td><a href="https://huggingface.co/datasets/sprd12/Great_Learning/tree/main">sprd12/Great_Learning</a></td></tr>
+    <tr><td>Hugging Face model</td><td><a href="https://huggingface.co/sprd12/RandomForest/tree/main">sprd12/RandomForest</a></td></tr>
+    <tr><td>Hugging Face Space</td><td><a href="https://huggingface.co/spaces/sprd12/wellness-tourism-app">wellness-tourism-app</a></td></tr>
+    </table>
+
+  <h2>Approach</h2>
+  <p>
+    The source dataset was registered and accessed through the Hugging Face dataset
+    repository. Data preparation removed the identifier fields <code>CustomerID</code>
+    and the exported CSV index, standardized missing values, and created stratified
+    training and testing datasets using a fixed random seed.
+  </p>
+  <p>
+    A scikit-learn pipeline performs numerical imputation, categorical imputation,
+    one-hot encoding, and Random Forest classification. Grid-search cross-validation
+    was used to tune the model, while MLflow records the selected parameters and
+    evaluation metrics.
+  </p>
+
+  <h2>Model Results</h2>
+  <table>
+    <tr><th>Metric</th><th>Result</th></tr>
+    <tr><td>Cross-validation ROC-AUC</td><td>0.937</td></tr>
+    <tr><td>Test ROC-AUC</td><td>0.966</td></tr>
+    <tr><td>Test accuracy</td><td>0.908</td></tr>
+    <tr><td>Classifier</td><td>Random Forest</td></tr>
+    <tr><td>Selected estimators</td><td>300</td></tr>
+  </table>
+
+  <h2>Deployment and MLOps</h2>
+  <ul>
+    <li><strong>Dockerfile:</strong> defines a Python 3.11 Streamlit container on port 7860.</li>
+    <li><strong>Streamlit app:</strong> collects customer inputs into a pandas DataFrame and loads the registered model from Hugging Face.</li>
+    <li><strong>Dependencies:</strong> are listed in <code>requirements.txt</code>.</li>
+    <li><strong>Hosting script:</strong> uploads the application files to a Hugging Face Space.</li>
+    <li><strong>GitHub Actions:</strong> automates dataset registration, data preparation, training, evaluation, model registration, and optional deployment.</li>
+    <li><strong>Continuous integration:</strong> the workflow runs on pushes to the <code>main</code> branch and supports manual execution.</li>
+  </ul>
+
+  <h2>How the Implementation Was Completed</h2>
+  <h3>1. Data registration and preparation</h3>
+  <p>
+    The original <code>tourism.csv</code> file was registered in the
+    <a href="https://huggingface.co/datasets/sprd12/Great_Learning/tree/main">Hugging Face dataset repository</a>.
+    The preparation script downloads the registered file, cleans column names,
+    removes <code>CustomerID</code> and the unwanted exported index, converts the
+    target column to an integer, and handles invalid target rows. A stratified
+    80/20 split is then saved as <code>train.csv</code> and <code>test.csv</code>
+    and uploaded back to the dataset repository.
+  </p>
+
+  <h3>2. Model training and registration</h3>
+  <p>
+    The training job loads the train and test files, separates the target
+    <code>ProdTaken</code>, and builds a reusable scikit-learn pipeline. Numeric
+    columns use median imputation; categorical columns use most-frequent
+    imputation followed by one-hot encoding. A Random Forest classifier is tuned
+    with grid-search cross-validation over tree count, depth, and minimum leaf
+    size. ROC-AUC is used to select the best configuration.
+  </p>
+  <p>
+    The selected parameters, cross-validation score, accuracy, ROC-AUC, and
+    classification report are saved to <code>metrics.json</code>. The complete
+    fitted preprocessing-and-model pipeline is serialized as
+    <code>model.joblib</code> and uploaded to
+    <a href="https://huggingface.co/sprd12/RandomForest/tree/main">sprd12/RandomForest</a>.
+    MLflow is used during training to record the tuned parameters and evaluation
+    metrics.
+  </p>
+
+  <h3>3. Streamlit prediction application</h3>
+  <p>
+    The Streamlit application presents a customer-input form for the relevant
+    demographic, travel, income, contact, and pitch attributes. When the user
+    submits the form, the values are placed into a one-row pandas DataFrame with
+    the same feature names used during training. The app downloads
+    <code>model.joblib</code> from the public Hugging Face model repository using
+    <code>hf_hub_download</code>, loads it with Joblib, and returns the predicted
+    purchase probability. The model is cached so it is not downloaded again on
+    every interaction.
+  </p>
+
+  <h3>4. Docker configuration</h3>
+  <p>
+    The Dockerfile starts from a lightweight Python 3.11 image, installs the
+    dependencies from <code>requirements.txt</code>, copies the Streamlit
+    application, exposes port <code>7860</code>, and starts Streamlit on
+    <code>0.0.0.0</code>. This makes the application compatible with the
+    container-based runtime used by Hugging Face Spaces.
+  </p>
+
+  <h3>5. Hosting and CI/CD</h3>
+  <p>
+    The hosting script uses the Hugging Face API to create a Docker Space and
+    upload <code>app.py</code>, <code>Dockerfile</code>, and
+    <code>requirements.txt</code>. The GitHub Actions workflow runs four dependent
+    stages: source-data registration, data preparation, model training/model
+    registration, and optional Space deployment. Hugging Face authentication is
+    supplied through the <code>HF_TOKEN</code> GitHub secret, so credentials are
+    not stored in the code. The dataset and model repository IDs are configured
+    as <code>sprd12/Great_Learning</code> and <code>sprd12/RandomForest</code>.
+  </p>
+
+  <h2>Deployment Limitation</h2>
+  <p>
+    The application and deployment configuration have been fully prepared, and a
+    Hugging Face Space has been created. However, executing the Python-based
+    Streamlit/Docker deployment required paid or separately enabled Space
+    hardware/configuration. Consequently, the executable deployment assets remain
+    available in GitHub and the Space provides the project hosting location, while
+    the final runtime deployment is subject to Hugging Face billing/configuration.
+  </p>
+  <p>
+    This limitation is external to the implementation. The Dockerfile, Streamlit
+    application, Hugging Face model-loading logic, dependency file, and hosting
+    script are complete and ready to run once the required Space configuration is
+    enabled.
+  </p>
+  
+  <table>
+    <tr><td>Model deployment</td><td>Dockerfile, Streamlit app, requirements file, model loading, and Space hosting script.</td></tr>
+    <tr><td>GitHub Actions MLOps</td><td>End-to-end <code>.github/workflows/pipeline.yml</code> workflow triggered from <code>main</code>.</td></tr>
+    <tr><td>Notebook quality</td><td>Notebook includes data preparation, model training, deployment configuration, workflow documentation, and evaluation links.</td></tr>
+    <tr><td>Output evaluation</td><td>Public GitHub, dataset, model, and Space links are provided above.</td></tr>
+  </table>
+
+  <h2>Conclusion</h2>
+  <p>
+    The project provides a reproducible and scalable MLOps solution for customer
+    purchase prediction. The data, trained model, notebook, automation workflow,
+    and deployment configuration are organized and publicly accessible. The core
+    technical requirements have been implemented; only the final live Space
+    runtime is constrained by the hosting plan.
+  </p>
+
+  </main>
+</body>
+</html>
