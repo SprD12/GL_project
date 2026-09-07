@@ -39,10 +39,9 @@ jobs:
           name: processed-data
           path: data/processed/
 
-    train-register:
+  train-register:
     needs: prepare-data
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
